@@ -1,11 +1,15 @@
 # Lasso
-**Lasso** is a simple tool to allow binding *form element change events* to *model properties*.  Currently, the script requires **Backbone** and **JQuery**.
+**Lasso** is a simple tool to allow binding *form element change events* to *model properties*.  Currently, the script requires **Backbone** and **jQuery**.
 
 ### Lasso Setup
 To use, simple include your **Lasso** reference into your scope and then call lasso on the model you wish to attach your form to.
 
     var someModel = new SomeBackboneModel();
     someModel.lasso('#some-form');
+    
+You can pass in a jQuery selector or a jQuery Object.
+
+    someModel.lasso($('#some-form'));
 
 Next, make sure to name each of the form elements in your form.
 
