@@ -19,10 +19,13 @@
     }
 
     // Add the lasso method to the prototype for Backbone Models
-    Backbone.Model.prototype.lasso = function(form, modifiers) {
+    Backbone.Model.prototype.lasso = function(form, options) {
 
-        var model = this;
-        var $form;
+        var $form, model = this;
+        var modifiers = (options && options.hasOwnProperty('modifiers') &&
+                options.modifiers instanceof Object) ? options.modifiers : {};
+        var loudNames = (options && options.hasOwnProperty('loudNames') &&
+                options.loudNames instanceof Array) ? options.loudNames : [];
 
         // Check to see if a string or a jQuery object has been passed
         if (typeof form === 'string') {
@@ -30,39 +33,29 @@
         } else if (form instanceof jQuery) {
             $form = form;
         } else {
-            return false;
+            return;
         }
 
         // Attach change event listeners to all of the form elements passed
         $form.find('input, textarea, select').each(function(i, o) {
-
             var $obj = $(o);
-
-            var checkboxCallback = function(e) {
-                var name = $obj.attr('name');
+            var isCheckbox = $obj.is(':checkbox');
+            var isRadio = $obj.is(':radio');
+            var callback = function(e) {
+                var i, silent = true, name = $obj.attr('name');
                 if (name) {
-                    model.set(name, $obj.prop('checked'), {silent: true});
-                }
-            };
-
-            var genericCallback = function(e) {
-                var name = $obj.attr('name');
-                if (name) {
-                    var val = $obj.val();
-                    if (modifiers && modifiers.hasOwnProperty(name)) {
+                    var val = isCheckbox ? $obj.prop('checked') : $obj.val();
+                    if (modifiers.hasOwnProperty(name) &&
+                            typeof modifiers[name] === 'function') {
                         val = modifiers[name](val);
                     }
-                    model.set(name, val, {silent: true});
+                    for (i = 0; i < loudNames.length; i++) {
+                        if (loudNames[i] === name) { silent = false; break; }
+                    }
+                    model.set(name, val, {silent: silent});
                 }
             };
-
-            if ($obj.is(':checkbox')) {
-                $obj.on('click', checkboxCallback);
-            } else if ($obj.is(':radio')) {
-                $obj.on('click', genericCallback);
-            } else {
-                $obj.on('change', genericCallback);
-            }
+            $obj.on(isCheckbox || isRadio ? 'click' : 'change', callback);
         });
 
     };
