@@ -1,6 +1,6 @@
 # Lasso
 **Lasso** is a simple tool to allow binding *form element change events*
-to *model properties*.  Currently, the script requires **Backbone** and
+to *model properties*. Currently, the script requires **Backbone** and
 **jQuery**.
 
 ### Lasso Setup
@@ -33,7 +33,7 @@ but saves you from having to define change events for every element.
 
 ### Options
 An optional second argument lets you specify zero or more options with an
-object. Here are the currently available options:
+object. There is only on available option right now:
 
 #### Modifiers
 **Lasso** supports modifying the value displayed in a form before saving it to
@@ -55,15 +55,14 @@ how.
 displayed to a user though - that's something your template library of choice
 should do.
 
-#### Loud Names
-**Lasso** normally updates the model silently so that a **Backbone** change
-event doesn't occur. In the event that you'd like a particular value to trigger
-the change event, you can specify that it should be loud.
+### Triggers
+**Lasso** always updates the model silently so that a **Backbone** change event
+doesn't occur and the value of hasChanged() remains useful. Since the change
+event will never be triggered, a custom event is triggered for every update
+instead.
 
-    var options = {
-        loudNames: ['text-element']
-    };
-    someModel.lasso('#some-form', options);
+    someModel.on('lasso:text-element', this.textElementUpdated, this);
+    someModel.lasso('#some-form');
 
-Now it's easy to hook into the regular **Backbone** event system to perform
-extra actions when certian fields change.
+This event can be used to perform extra actions such as modifying the user
+interface based on the current user selection.

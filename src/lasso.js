@@ -20,12 +20,11 @@
 
     // Add the lasso method to the prototype for Backbone Models
     Backbone.Model.prototype.lasso = function(form, options) {
-
         var $form, model = this;
+
+        // Get options or use defaults. New options can be added here
         var modifiers = (options && options.hasOwnProperty('modifiers') &&
                 options.modifiers instanceof Object) ? options.modifiers : {};
-        var loudNames = (options && options.hasOwnProperty('loudNames') &&
-                options.loudNames instanceof Array) ? options.loudNames : [];
 
         // Check to see if a string or a jQuery object has been passed
         if (typeof form === 'string') {
@@ -39,25 +38,21 @@
         // Attach change event listeners to all of the form elements passed
         $form.find('input, textarea, select').each(function(i, o) {
             var $obj = $(o);
+            var name = $obj.attr('name');
+            if (!name) { return; }
             var isCheckbox = $obj.is(':checkbox');
             var isRadio = $obj.is(':radio');
-            var callback = function(e) {
-                var i, silent = true, name = $obj.attr('name');
-                if (name) {
-                    var val = isCheckbox ? $obj.prop('checked') : $obj.val();
-                    if (modifiers.hasOwnProperty(name) &&
-                            typeof modifiers[name] === 'function') {
-                        val = modifiers[name](val);
-                    }
-                    for (i = 0; i < loudNames.length; i++) {
-                        if (loudNames[i] === name) { silent = false; break; }
-                    }
-                    model.set(name, val, {silent: silent});
+            var callback = function() {
+                var val = isCheckbox ? $obj.prop('checked') : $obj.val();
+                if (modifiers.hasOwnProperty(name) &&
+                        typeof modifiers[name] === 'function') {
+                    val = modifiers[name](val);
                 }
+                model.set(name, val, {silent: true});
+                model.trigger('lasso:' + name);
             };
             $obj.on(isCheckbox || isRadio ? 'click' : 'change', callback);
         });
-
     };
 
 }).call(this);
