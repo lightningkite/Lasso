@@ -49,6 +49,7 @@
                     val = modifiers[name](val);
                 }
                 model.set(name, val, {silent: true});
+                model.trigger('lasso');
                 model.trigger('lasso:' + name);
             };
             $obj.on(isCheckbox || isRadio ? 'click' : 'change', callback);
